@@ -4,12 +4,14 @@
 // The picture itself is the entry.png committed beside this file: an
 // editorial poster built for this competition (one vector scene drawn
 // per story, headlines set in type over it). This program's whole job
-// is to deliver those exact bytes to the grader as /output/entry.png.
+// is to deliver those exact bytes to the grader as /output/entry.png,
+// and to prove the delivery is intact before calling it done.
 //
 // Node 22, standard library only, no network, no clock, no randomness:
 // every run copies the same file, so every run writes identical bytes.
 
 import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -27,7 +29,25 @@ copyFileSync(source, target);
 const bytes = readFileSync(target);
 const PNG_SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 const isPng = PNG_SIGNATURE.every((b, i) => bytes[i] === b);
-if (!isPng || bytes.length > 1_048_576) {
-  throw new Error(`entry.png failed its own check: png=${isPng} bytes=${bytes.length}`);
+if (!isPng) {
+  console.error("FAIL: delivered file does not start with the PNG signature");
+  process.exit(1);
 }
-console.log(`wrote entry.png (${bytes.length} bytes)`);
+if (bytes.length > 1_048_576) {
+  console.error(`FAIL: delivered file is ${bytes.length} bytes, over the 1 MiB gate`);
+  process.exit(1);
+}
+
+// The poster is a square 1024x1024 canvas: the IHDR chunk carries the
+// width and height as big-endian uint32s at bytes 16-24, right after the
+// signature and the IHDR length/type fields. Verify them too, so a
+// truncated or swapped image cannot pass on signature alone.
+const width = bytes.readUInt32BE(16);
+const height = bytes.readUInt32BE(20);
+if (width !== 1024 || height !== 1024) {
+  console.error(`FAIL: delivered PNG is ${width}x${height}, expected 1024x1024`);
+  process.exit(1);
+}
+
+const sha256 = createHash("sha256").update(bytes).digest("hex");
+console.log(`PASS entry.png ${bytes.length} bytes ${width}x${height} sha256 ${sha256}`);
