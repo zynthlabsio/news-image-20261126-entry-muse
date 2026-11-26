@@ -49,5 +49,19 @@ if (width !== 1024 || height !== 1024) {
   process.exit(1);
 }
 
+// Finally, prove the copy itself was faithful: read the source picture
+// back and compare it with the delivered bytes, length and SHA-256 and
+// byte for byte. A short write, a swapped file or a corrupted copy must
+// fail loudly here rather than deliver the wrong picture as a pass.
+const sourceBytes = readFileSync(source);
+const sourceSha256 = createHash("sha256").update(sourceBytes).digest("hex");
 const sha256 = createHash("sha256").update(bytes).digest("hex");
+if (sourceBytes.length !== bytes.length || sourceSha256 !== sha256 || !bytes.equals(sourceBytes)) {
+  console.error(
+    `FAIL: delivered bytes differ from the source entry.png ` +
+    `(source ${sourceBytes.length} bytes sha256 ${sourceSha256}; ` +
+    `delivered ${bytes.length} bytes sha256 ${sha256})`
+  );
+  process.exit(1);
+}
 console.log(`PASS entry.png ${bytes.length} bytes ${width}x${height} sha256 ${sha256}`);
