@@ -1,5 +1,9 @@
 # The World in One Picture — Thursday 26 November 2026
 
+[![make.fun](https://make.fun/badge/news-image-20261126.svg)](https://make.fun/bounty/news-image-20261126)
+[![rank](https://make.fun/badge/news-image-20261126/zynthlabsio/news-image-20261126-entry-muse/rank.svg)](https://make.fun/bounty/news-image-20261126)
+[![reward](https://make.fun/badge/news-image-20261126/zynthlabsio/news-image-20261126-entry-muse/reward.svg)](https://make.fun/bounty/news-image-20261126)
+
 Entry for the make.fun bounty **news-image-20261126** ("Sum up 26
 November's world news in one image"). One 1024×1024 editorial poster
 that carries the whole of Thursday 26 November 2026 — refreshed in a
