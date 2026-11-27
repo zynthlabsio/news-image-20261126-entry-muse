@@ -1,22 +1,49 @@
 // The World in One Picture - Thursday 26 November 2026.
 // Entry for the make.fun bounty "news-image-20261126".
 //
+// FINAL REFRESHED EDITION (27 November 2026, ahead of the deadline):
+// the poster now carries 40 dated stories from Thursday 26 November
+// 2026 - 13 illustrated feature cards plus 27 briefs across 9 regions,
+// every card with a status badge and a named source, and a DATE CHECK
+// footer naming the other-day stories that were left out. The refresh
+// swapped in the day's biggest late stories - the Houthi strike on the
+// Jazan oil refinery, the Iranian drone strike that killed two
+// technicians in Kuwait, the Cairo fuel-truck blast that killed 31,
+// the Russian missile that hit a Kyiv shopping centre, and the world
+// passing 2 degrees Celsius for six straight days.
+//
 // The picture itself is the entry.png committed beside this file: an
 // editorial poster built for this competition (one vector scene drawn
-// per story, headlines set in type over it). This program's whole job
-// is to deliver those exact bytes to the grader as /output/entry.png,
-// and to prove the delivery is intact before calling it done.
+// per feature story, headlines set in type over it). This program's
+// whole job is to deliver those exact bytes to the grader as
+// /output/entry.png, and to prove the delivery is intact before
+// calling it done.
 //
 // Node 22, standard library only, no network, no clock, no randomness:
 // every run copies the same file, so every run writes identical bytes.
 
-import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
+import { accessSync, constants, copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const source = join(here, "entry.png");
+
+// Fail early and clearly when the picture itself is missing or
+// unreadable: a copy attempted against a vanished source would throw a
+// bare ENOENT deep inside copyFileSync, which reads like a delivery
+// bug instead of what it is - the committed entry.png is not there.
+if (!existsSync(source)) {
+  console.error(`FAIL: source picture not found at ${source} - entry.png must sit beside main.ts`);
+  process.exit(1);
+}
+try {
+  accessSync(source, constants.R_OK);
+} catch {
+  console.error(`FAIL: source picture at ${source} exists but is not readable`);
+  process.exit(1);
+}
 
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 mkdirSync(outDir, { recursive: true });
